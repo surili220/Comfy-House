@@ -9,7 +9,10 @@ const cartTotal = document.querySelector(".cart-total");
 const cartContent = document.querySelector(".cart-content");
 const productsDOM = document.querySelector(".products-center");
 
-
+//cart items
+let cart =[];
+//buttons
+let buttonsDOM = [];
 
 //getting products
 class Products{
@@ -41,7 +44,8 @@ class Products{
 
 }
 //displaying the products
-class UI{
+class UI
+{
     displayProducts(products) {
         let result = "";
         products.forEach(product => {
@@ -67,11 +71,91 @@ class UI{
         });
         productsDOM.innerHTML = result;
       }
+    //getting all the buttons
+    //you will get them in node list ...hence converting them into an array.
+    
+      // if the item is added in the  cart, we check with the id., if its present in the cart array or not.
+    //if the item is in the cart we need to disable the button to add the item.
+
+    
+    getBagButtons()
+    {
+        //used the spread operator to convert the node list into array.
+        const buttons = [...document.querySelectorAll(".bag-btn")];
+        buttonsDOM = buttons;
+        buttons.forEach(button =>{
+         
+            let id = button.dataset.id; 
+            let inCart = cart.find(item => item.id === id);
+            if(inCart)
+            {
+                button.innerText = "in cart";
+                button.disabled = true;
+            }
+                button.addEventListener('click', (event)=>{
+                event.target.innerText ="In Cart";
+                event.target.disabled = true;
+                //get product from products
+                let cartItem = {...Storage.getProduct(id), amount : 1};
+                
+                //add product to the cart
+                //here we are also adding the items already present in the cart and the new items
+                cart =[...cart, cartItem];
+                //save the cart in local storage
+                Storage.saveCart(cart);
+                //set the values
+                this.setCartValues(cart);
+                //display cart items
+                //show the cart
+        
+              }); 
+    
+        });
+    
+    }  
+    
+    
+    setCartValues(cart)
+    {
+        let tempTotal =0;
+        let itemsTotal =0;
+
+        cart.map(item =>{
+          tempTotal += item.price * item.amount;
+          itemsTotal += item.amount;  
+        })
+
+        cartTotal.innerText =parseFloat(tempTotal.toFixed(2));
+        cartItems.innerText = itemsTotal;
     }
+    
+    
 
+    
 
+ 
+
+}
 //local storage
 class  Storage{
+  //saving all the data locally on local storage. the setOtem method accepts key value pairs. Key here is products and value is the
+  //JSON array that we need to convert into string and store it as a value,
+  static saveProducts(products)
+  {
+    localStorage.setItem("products", JSON.stringify(products));
+
+  }
+  static getProduct(id){
+   //getting all the products from the local storage 
+    let products = JSON.parse(localStorage.getItem('products'));
+   //finding the product in the array with the id that is passed from the fuction.
+    return products.find(product => product.id === id);
+  }
+  
+  static saveCart(cart)
+  {
+    localStorage.setItem("cart", JSON.stringify(cart));
+  }
 
 }
 //DOMCOntentLoader- It is an event that fires when the inital html has been loaded without any stylesheets, images finish toload.
@@ -80,6 +164,12 @@ const ui = new UI();
 const prod = new Products();
 
 //getting the products
-prod.getProducts().then(products => ui.displayProducts(products));
+prod.getProducts().then(products => {
+  ui.displayProducts(products)
+Storage.saveProducts(products)
+}).then(() => {
 
-})
+  ui.getBagButtons();  
+});
+
+});
