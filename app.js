@@ -108,6 +108,7 @@ class UI
                 //display cart items
                 this.addCartItem(cartItem);
                 //show the cart
+                this.showCart();
         
               }); 
     
@@ -148,11 +149,30 @@ class UI
         </div>` ;
 
         cartContent.appendChild(div);
+       
     }
-
+     showCart()
+     {
+        cartOverlay.classList.add('transparentBcg');
+        cartDOM.classList.add('showCart');
+     }
     
+     setupAPP()
+     {
+        cart =Storage.getCart();
+        this.setCartValues(cart);
+        this.populateCart(cart);
+        cartBtn.addEventListener('click' , this.showCart);
+        closeCartBtn.addEventListener('click' ,this.hideCart);
+     }
+     populateCart(cart){
+      cart.forEach(item => this.addCartItem(item))
 
- 
+     }
+     hideCart(){
+      cartOverlay.classList.remove('transparentBcg');
+      cartDOM.classList.remove('showCart');
+     }
 
 }
 //local storage
@@ -175,12 +195,18 @@ class  Storage{
   {
     localStorage.setItem("cart", JSON.stringify(cart));
   }
+  static getCart()
+  {
+    return localStorage.getItem('cart')? JSON.parse(localStorage.getItem('cart')):[];
+  }
 
 }
 //DOMCOntentLoader- It is an event that fires when the inital html has been loaded without any stylesheets, images finish toload.
 document.addEventListener("DOMContentLoaded", () => {
 const ui = new UI();
 const prod = new Products();
+//setting up the ui
+ui.setupAPP();
 
 //getting the products
 prod.getProducts().then(products => {
