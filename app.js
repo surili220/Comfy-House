@@ -179,6 +179,43 @@ class UI
        clearCartBtn.addEventListener('click',() => {
         this.clearCart();
        });
+       cartContent.addEventListener('click', event =>{
+         if(event.target.classList.contains("remove-item"))
+         {
+           let removeItem = event.target;
+           let id =removeItem.dataset.id;
+           cartContent.removeChild(removeItem.parentElement.parentElement);
+           this.removeItem(id);
+         }
+         else if(event.target.classList.contains("fa-chevron-up"))
+         {
+          let addAmount =event.target;
+          let id = addAmount.dataset.id;
+          let tempItem =cart.find(item => item.id ===id);
+          tempItem.amount += 1;
+          Storage.saveCart(cart);
+          this.setCartValues(cart);
+          addAmount.nextElementSibling.innerText=tempItem.amount;
+         }
+         else if(event.target.classList.contains("fa-chevron-down"))
+         {
+          let subAmount =event.target;
+          let id = subAmount.dataset.id;
+          let tempItem =cart.find(item => item.id ===id);
+          tempItem.amount -= 1;
+          if(tempItem.amount>0){
+            Storage.saveCart(cart);
+            this.setCartValues(cart);
+            subAmount.previousElementSibling.innerText=tempItem.amount;
+          }
+          else{
+            cartContent.removeChild(subAmount.parentElement.parentElement);
+            this.removeItem(id);
+          }
+          
+         }
+       });
+
      }
      clearCart()
      {
